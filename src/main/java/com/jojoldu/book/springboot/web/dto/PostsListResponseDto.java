@@ -15,6 +15,7 @@ public class PostsListResponseDto {
     private LocalDateTime modifiedDate;
 
     public PostsListResponseDto(Posts entity){
+        System.out.println("==========PostsListResponseDto.PostsListResponseDto==========");
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.author = entity.getAuthor();

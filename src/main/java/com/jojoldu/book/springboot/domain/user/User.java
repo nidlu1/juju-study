@@ -39,6 +39,7 @@ public class User extends BaseTimeEntity {
 
     @Builder
     public User(String name, String email, String picture, Role role){
+        System.out.println("==========User.User==========");
         this.name = name;
         this.email = email;
         this.picture = picture;
@@ -46,6 +47,7 @@ public class User extends BaseTimeEntity {
     }
 
     public User update(String name, String picture){
+        System.out.println("==========User.update==========");
         this.name = name;
         this.picture = picture;
 
@@ -53,6 +55,7 @@ public class User extends BaseTimeEntity {
     }
 
     public String getRoleKey(){
+        System.out.println("==========User.getRoleKey==========");
         return this.role.getKey();
     }
 }

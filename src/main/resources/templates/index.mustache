@@ -19,6 +19,11 @@
                 {{^userName}} <!--머스테치에서 해당 값이 존재하지 않는 경우의 ^사용.-->
                     <a href="/oauth2/authorization/google" class="btn btn-success active" role="button">Google Login</a>
                         <!--oauth2/authorization/google: 스프링시큐리티에서 기본적으로 제공하는 로그인url. 로그아웃url처럼 개발자가 별도의 컨트롤러 생성 불필요. -->
+
+                    <a href="/oauth2/authorization/naver" class="btn btn-secondary active" role="button">Naver Login. 사용불가.</a>
+                        <!--oauth2/authorization/naver: 로그인url은 application.properties에서 등록한 redirect-uri값에 맞춰 자동등록.
+                        {baseUrl}/{action}/oauth2/code/{registrationId}
+                         oauth2/authorization/만 고정이고 마지막 Path만 각 소셜 로그인 코드를 사용하면 됨. 여기선 naver가 마지막 Path.-->
                 {{/userName}}
             </div>
         </div>

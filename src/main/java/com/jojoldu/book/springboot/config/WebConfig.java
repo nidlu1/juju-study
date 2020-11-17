@@ -16,6 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolver){
+        System.out.println("==========WebConfig.addArgumentResolvers==========");
         argumentResolver.add(loginUserArgumentResolver);
         /*
             HandlerMethodArgumentResolver는 항상 WebMvcConfigurer addArgumentResolvers()을 통해 추가해야함.

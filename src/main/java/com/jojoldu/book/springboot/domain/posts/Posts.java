@@ -29,12 +29,14 @@ public class Posts extends BaseTimeEntity {
 
     @Builder //해당 클래스의 빌더패턴 클래스를 생성. 생성자 상단에 선언 시 생성자에 포함된 필드만 빌더에 포함.
     public Posts(String title, String content, String author){
+        System.out.println("==========Posts.Posts==========");
         this.title = title;
         this.content = content;
         this.author = author;
     }
 
     public void update(String title, String content){
+        System.out.println("==========Posts.update==========");
         this.title = title;
         this.content = content;
     }

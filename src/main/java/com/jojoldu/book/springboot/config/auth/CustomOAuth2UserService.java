@@ -25,15 +25,17 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        System.out.println("==========CustomOAuth2UserService.loadUser==========");
         OAuth2UserService delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId(); // 현재 로그인 진행중인 서비스를 구분하는 코드.
                                                                                         // 지금은 구글만 사용해 불필요한 값이지만, 이후 네이버 로그인 연동 시에 네이버로그인인지, 구글로그인인지 구분하기 위해 사용.
 
+        System.out.println("======================CustomOAuth2UserService의 registrationId:"+registrationId);
         String userNameAttributeName = userRequest.getClientRegistration().
                                         getProviderDetails().getUserInfoEndpoint().
-                                        getUserNameAttributeName(); // userNameAttributeName: OAuth2 롷그인 진행시 키가 되는 필드값을 이야기.
+                                        getUserNameAttributeName(); // userNameAttributeName: OAuth2 로그인 진행시 키가 되는 필드값을 이야기.
                                                                     // primaryKey와 같은 의미. 구글의 경우 기본적으로 코드를 지원하지만, 네이버,카카오등은 기본지원하지 않음. 구글의 기본코드는 sub.
                                                                     // 이후 네이버 로그인과 구글 로그인을 동시 지원할 때 사용됨.
 
@@ -48,6 +50,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private User saveOrUpdate(OAuthAttributes attributes){
+        System.out.println("==========CustomOAuth2UserService.saveOrUpdate==========");
         User user = userRepository.findByEmail( attributes.getEmail() ).map( entity -> entity.update(attributes.getName(), attributes.getPicture()) )
                                                 .orElse( attributes.toEntity() );
 

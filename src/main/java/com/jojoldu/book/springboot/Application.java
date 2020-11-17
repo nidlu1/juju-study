@@ -8,8 +8,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 public class Application {
     public static void main(String[] args){
+        System.out.println("==========Application.main==========");
         SpringApplication.run(Application.class, args);
     }
+
 }
         // application.properties
         //spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5Dialect -> sql문

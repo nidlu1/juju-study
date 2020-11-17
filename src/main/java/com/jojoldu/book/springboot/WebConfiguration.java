@@ -16,6 +16,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {
+        System.out.println("==========WebConfiguration.configureViewResolvers==========");
 
         MustacheViewResolver resolver = new MustacheViewResolver();
         resolver.setCharset("UTF-8");
@@ -24,7 +25,6 @@ public class WebConfiguration implements WebMvcConfigurer {
         resolver.setSuffix(".mustache");
         resolver.setCache(true);
         resolver.setCacheLimit(8192);
-
         registry.viewResolver(resolver);
     }
 

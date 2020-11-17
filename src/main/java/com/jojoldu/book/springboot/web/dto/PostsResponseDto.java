@@ -11,6 +11,7 @@ public class PostsResponseDto {
     private String author;
 
     public PostsResponseDto(Posts entity){
+        System.out.println("==========PostsResponseDto.PostsResponseDto==========");
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.content = entity.getContent();

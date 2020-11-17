@@ -17,6 +17,7 @@ public class OAuthAttributes {
 
     @Builder
     public OAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String name, String email, String picture){
+        System.out.println("==========OAuthAttributes.OAuthAttributes==========");
         this.attributes = attributes;
         this.nameAttributeKey = nameAttributeKey;
         this.name = name;
@@ -25,11 +26,20 @@ public class OAuthAttributes {
     }
 
     public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map<String, Object> attributes){
+        System.out.println("==========OAuthAttributes.of==========");
+        //구글인지 네이버인지 판단한다.
+        if ("naver".equals(registrationId)) {
+            System.out.println("======================of네이버함수:"+registrationId);
+            return ofNaver("id", attributes);
+        }else
+            System.out.println("======================of구글함수:"+registrationId);
+            
         return ofGoogle(userNameAttributeName, attributes);
     }
     //of(): OAuth2User에서 반환하는 사용자 정보는 Map이기 때문에 값 하나하나를 변환해야 함.
 
     public static OAuthAttributes ofGoogle(String userNameAttributeName, Map<String, Object> attributes){
+        System.out.println("==========OAuthAttributes.ofGoogle==========");
         return OAuthAttributes.builder()
                 .name( (String) attributes.get("name") )
                 .email( (String) attributes.get("email") )
@@ -39,7 +49,29 @@ public class OAuthAttributes {
                 .build();
     }
 
+    public static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes){
+        System.out.println("==========OAuthAttributes.ofNaver==========");
+        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+
+        System.out.println("======================ofNaver리턴값: "+OAuthAttributes.builder()
+                .name( (String) attributes.get("name"))
+                .email( (String) attributes.get("email"))
+                .picture( (String) attributes.get("profile_image"))
+                .attributes(response)
+                .nameAttributeKey(userNameAttributeName)
+                .build());
+
+        return OAuthAttributes.builder()
+                .name( (String) attributes.get("name"))
+                .email( (String) attributes.get("email"))
+                .picture( (String) attributes.get("profile_image"))
+                .attributes(response)
+                .nameAttributeKey(userNameAttributeName)
+                .build();
+    }
+
     public User toEntity(){
+        System.out.println("==========OAuthAttributes.toEntity==========");
         return User.builder()
                 .name(name)
                 .email(email)

@@ -12,6 +12,7 @@ public class PostsUpdateRequestDto {
 
     @Builder
     public PostsUpdateRequestDto(String title, String content){
+        System.out.println("==========PostsUpdateRequestDto.PostsUpdateRequestDto==========");
         this.title = title;
         this.content = content;
     }

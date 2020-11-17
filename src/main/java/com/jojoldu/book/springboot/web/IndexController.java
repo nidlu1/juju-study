@@ -23,7 +23,7 @@ public class IndexController {
     
     @GetMapping("/")
     public String index(Model model, @LoginUser SessionUser user){
-
+        System.out.println("==========IndexController.index==========");
         model.addAttribute("posts",postsService.findAllDesc());
         
         //20201117 추가: oauth2 구글 로그인을 위한 코드.
@@ -48,11 +48,13 @@ public class IndexController {
 
     @GetMapping("/posts/save")
     public String postsSave(){
+        System.out.println("==========IndexController.postsSave==========");
         return "posts-save";
     }
 
     @GetMapping("/posts/update/{id}")
     public String postsUpdate(@PathVariable Long id, Model model){
+        System.out.println("==========IndexController.posts/update==========");
         PostsResponseDto dto = postsService.findById(id);
         model.addAttribute("post",dto);
         return "posts-update";
