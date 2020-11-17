@@ -1,5 +1,6 @@
 package com.jojoldu.book.springboot.web;
 
+import com.jojoldu.book.springboot.config.auth.LoginUser;
 import com.jojoldu.book.springboot.config.auth.dto.SessionUser;
 import com.jojoldu.book.springboot.service.PostsService;
 import com.jojoldu.book.springboot.web.dto.PostsResponseDto;
@@ -21,12 +22,14 @@ public class IndexController {
     private final HttpSession httpSession; // oauth2 로그인을 위해 추가.
     
     @GetMapping("/")
-    public String index(Model model){
+    public String index(Model model, @LoginUser SessionUser user){
 
         model.addAttribute("posts",postsService.findAllDesc());
         
         //20201117 추가: oauth2 구글 로그인을 위한 코드.
-        SessionUser user = (SessionUser) httpSession.getAttribute("user");
+        //SessionUser user = (SessionUser) httpSession.getAttribute("user"); //어노테이션 기반으로 개선하기. 메소드인자로 세견값을 바로 받을 수 있게 개선.
+        // 이제 로그인 유저 세션을 받아오면 파라미터에 @LoginUser SessionUser user을 추가하면 됨. 위코드 같은 비즈니스로직이 필요 없음.
+
         if(user != null)
             model.addAttribute("userName",user.getName());
         // 끝
