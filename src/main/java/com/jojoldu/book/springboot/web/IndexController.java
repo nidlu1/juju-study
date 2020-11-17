@@ -1,5 +1,6 @@
 package com.jojoldu.book.springboot.web;
 
+import com.jojoldu.book.springboot.config.auth.dto.SessionUser;
 import com.jojoldu.book.springboot.service.PostsService;
 import com.jojoldu.book.springboot.web.dto.PostsResponseDto;
 import com.samskivert.mustache.Mustache;
@@ -9,18 +10,26 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import javax.servlet.http.HttpSession;
+
 
 @RequiredArgsConstructor //20201116 postsService 생성자.
 @Controller
 public class IndexController {
 
     private final PostsService postsService;
-
+    private final HttpSession httpSession; // oauth2 로그인을 위해 추가.
+    
     @GetMapping("/")
     public String index(Model model){
 
         model.addAttribute("posts",postsService.findAllDesc());
-
+        
+        //20201117 추가: oauth2 구글 로그인을 위한 코드.
+        SessionUser user = (SessionUser) httpSession.getAttribute("user");
+        if(user != null)
+            model.addAttribute("userName",user.getName());
+        // 끝
         return "index";
     }
 
