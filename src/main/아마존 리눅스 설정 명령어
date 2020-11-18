@@ -1,0 +1,28 @@
+ec2-user@15.165.102.78
+
+
+#자바8설치 및 자바7 삭제
+sudo yum install -y java-1.8.0-openjdk-devel.x86_64
+sudo /usr/sbin/alternatives --config java
+2
+##자바7삭제
+sudo yum remove java-1.7.0-openjdk
+#java 버전 확인
+java -version
+
+##타임존 변경
+sudo rm /etc/localtime
+sudo ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+
+#host네임 변경.
+sudo vim /etc/sysconfig/network
+nidlu_aws_service 이후 esc 후 :w로 저장후  :q로 나간다.
+
+#
+sudo vim /etc/hosts
+127.0.0.1 nidlu_aws_service 이후 :wq
+
+#제대로 등록되었는지 확인하기
+curl nidlu_aws_service -> (7)failed to connect to ~ : 80포트로 접근이 안된다는 에러발생. curl호스트이름으로 실행은 잘 됨.
+
+
