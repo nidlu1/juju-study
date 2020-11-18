@@ -1,0 +1,42 @@
+6장에서 배운 것 정리
+*AWS와 클라우드 서비스란?
+*AWS 관리형 가상 서버인 EC2 서비스 소개와 생성방법.
+*EC2 인스턴스의 IP를 고정해주는 탄력적 IP에 대한 소개와 설정 방법.
+
+*EC2 인스턴스 접근을 위한 pem키사용법
+putty설치
+puttygen에서 import key로 pem을 ppk로 생성
+putty 실행
+    host: ec2-user@15.165.102.78
+    port: 22
+    connection type = SSH
+
+사이드바 Connection -> ssh -> auth->browse-> ppk파일 선택.
+session탭에서 save sessions으로 현재 설정들을 저장할 이름 만들고 save.
+
+#아마존 리눅스 1서버 생성시 꼭 해야하는 설정들
+##자바8설치 및 자바7 삭제
+sudo yum install -y java-1.8.0-openjdk-devel.x86_64
+sudo /usr/sbin/alternatives --config java
+2
+##자바7삭제
+sudo yum remove java-1.7.0-openjdk
+#java 버전 확인
+java -version
+
+##타임존 변경
+sudo rm /etc/localtime
+sudo ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+
+#host네임 변경.
+sudo vim /etc/sysconfig/network
+nidlu_aws_service 이후 esc 후 :w로 저장후  :q로 나간다.
+
+#
+sudo vim /etc/hosts
+127.0.0.1 nidlu_aws_service 이후 :wq
+
+#제대로 등록되었는지 확인하기
+curl nidlu_aws_service -> (7)failed to connect to ~ : 80포트로 접근이 안된다는 에러발생. curl호스트이름으로 실행은 잘 됨.
+
+
