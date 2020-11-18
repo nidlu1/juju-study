@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 
-@EnableJpaAuditing // JPA Auditing 활성화
+//@EnableJpaAuditing // JPA Auditing 활성화// 5.7 시큐리티에서 분리함. JpaConfig에 생성
 @SpringBootApplication
 public class Application {
     public static void main(String[] args){

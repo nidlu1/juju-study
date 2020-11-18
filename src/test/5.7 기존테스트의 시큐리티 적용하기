@@ -1,0 +1,23 @@
+hello가_리턴된다.()
+
+문제1. CustomOAuth2UserService를 찻을 수 없음.
+에러내용: Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'securityConfig' defined in file [C:\Users\user\IdeaProjects\com.jujuldu.book\build\classes\java\main\com\jojoldu\book\springboot\config\auth\SecurityConfig.class]: Unsatisfied dependency expressed through constructor parameter 0; nested exception is org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'com.jojoldu.book.springboot.config.auth.CustomOAuth2UserService' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+원인: CustomOAuth2UserService를 생성하는데 필요한 관련설정값이 없어서.
+원인2: src/main과 src/test의환경차이: src/test는  자신만의 application.properties가 없으면 main 것을 참조한다. application-oauth.properties은 안가져온다.
+
+문제2. 302 status code
+posts_등록된다
+에러내용:
+    expected:<[200 OK]> but was:<[302 FOUND]>
+    Expected :200 OK
+    Actual   :302 FOUND
+응답결과로 200을 바랬지만 302 status code(리다이렉션 응답)이 와서 실패. 스프링시큐리티 설정으로 인증되지 않은 사용자의 요청은 이동시킴.
+임의로 인증된 사용자를 추가한다.
+
+문제3. @WebMvcTest에서 CustomOAuth2UserService을 찾을 수 없음.
+HelloControllerTest는 1번문제와 다른점있음. @WebMvcTest를 사용한다는점. @WebMvcTest는 CustomOAuth2UserService을 스캔하지 않음.
+@WebMvcTest는 WebSecurityConfiguerAdapter, WebMvcConfigurer를 비롯한 @ContrllerAdvice, @Controller를 읽지만 @레포지토리, @서비스, @컴포넌트는 스캔대상이 아님.
+
+HelloController문제를 해결해도
+Caused by: java.lang.IllegalArgumentException: JPA metamodel must not be empty!
+Caused by: java.lang.IllegalArgumentException: JPA metamodel must be present!
