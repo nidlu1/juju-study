@@ -52,16 +52,12 @@ echo "> 프로젝트 Build 시작"
 ./gradlew Build         // 프로젝트 내부의 gradlew로 build를 수행.
 
 echo "> step1 디렉토리로 이동"
-cd
 cd $REPOSITORY
 
 echo "> Build 파일 복사"
-cd
 cp $REPOSITORY/$PROJECT_NAME/build/libs/*.jar $REPOSITORY/          //build의 결과물인 jar파일을 복사해 jar파일을 모아둔 위치로 복사함.
 
 echo "> 현재 구동중인 애플리케이션 pid 확인"
-cd
-cd $REPOSITORY
 CURRENT_PID=$(pgrep -f ${PROJECT_NAME}*.jar)        //기존에 수행중이던 스프링부트 애플리케이션을 종료. pgrep: process id만 추출하는 명령어 -f옵션은 프로세스 이름으로 찾음.
 CURRENT_PID=$(pgrep -f com.jujuldu.book-1.0-SNAPSHOT.jar)
 
@@ -76,14 +72,10 @@ else
 fi
 
 echo "> 새 애플리케이션 배포"
-//JAR_NAME=$(ls -tr $REPOSITORY/ | grep *.jar | tail -n 1)        // 새로 실행할 jar 파일명을 찾는다. 여러 jar파일이 생기기 때문에 tail -n으로 가장 나중의 jar파일(최신파일)을 변수에 저장.
-cd
-cd $REPOSITORY
-JAR_NAME=$(ls -tr grep *.jar | tail -n 1)
+JAR_NAME=$(ls -tr $REPOSITORY/ | grep *.jar | tail -n 1)        // 새로 실행할 jar 파일명을 찾는다. 여러 jar파일이 생기기 때문에 tail -n으로 가장 나중의 jar파일(최신파일)을 변수에 저장.
 
 echo "> JAR Name: $JAR_NAME"
-cd
-nohup java -jar $REPOSITORY/com.jujuldu.book-1.0-SNAPSHOT.jar 2>&1 &
+nohup java -jar $REPOSITORY/$JAR_NAME 2>&1 &
 
 //찾은 jar파일명으로 해당 jar파일을 nohup로 실행
 //스프링부트의 장점으로 특별히 외장 톰캣을 설치할 필요 없음.
@@ -129,12 +121,18 @@ Consider revisiting the entries above or defining a bean of type 'org.springfram
 app 디렉토리에 propertise 파일 생성.
 cd /home/ec2-user/app/application-oauth.properties
 
-# 방금 생성한 application-oauth.properties 쓰도록 deploy.sh파일의 수정 (nohup java -jar $REPOSITORY/$JAR_NAME 2>&1 & 이부분 수정)
- nohup java -jar \
-    -Dspring.config.location=classpath:/application.properties, /home/ec2-user/app/application-oauth.properties \  nohup java -jar app/step1/com.jujuldu.book-1.0-SNAPSHOT.jar 2>&1 &
-//Dspring.config.location :
-//스프링 설정 파일 위치를 지정.
+# 방금 생성한 application-oauth.properties 쓰도록 deploy.sh파일의 수정
+nohup java -jar $REPOSITORY/$JAR_NAME 2>&1 &
+↓
+nohup java -jar -Dspring.config.location=classpath:/application.properties,/home/ec2-user/app/application-oauth.properties $REPOSITORY/$JAR_NAME 2>&1 &
+
+//Dspring.config.location : //스프링 설정 파일 위치를 지정.
 //기본옵션들을 담고 있는 application.properties와 application-oauth.properties의 위치를 지정.
 //classpath가 붙으면 jar 안에 있는 resources 디렉토리를 기준으로 경로가 생성. application-oauth.properties는 절대경로 생성. 외부에 파일이 있기 때문.
+//리눅스 서버에서 \ 쓰면 다음라인도 한라인으로 인식함.
 
-사실상 성공하지 못해 그냥 깃에 application-oauth.properties를 올렸다.
+8.4 스프링부트프로젝트로 RDS접근하기.
+mariadb에서 스프링부트 프로젝트를 실행하기 위해선 몇가지 작업이 필요.
+ *테이블생성
+ *프로젝트 설정
+ *EC2(리눅스 서버) 설정
