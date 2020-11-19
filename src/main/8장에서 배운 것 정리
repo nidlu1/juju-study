@@ -40,10 +40,10 @@ https://github.com/johngrib/simple_vim_guide/blob/master/md/for_beginners.md
 
 배포스크립트 작성.
 #!/bin.bash
-REPOSITORY=/home/ec-user/app/step1  //프로젝트 디렉토리주소는 스크립트 내에서 자주 사용하는 값이니 변수로 저장. /home/ec-user/은 첫 접속시 자동이동 되니 app/step1만 입력해도 될듯
+REPOSITORY=/home/ec2-user/app/step1  //프로젝트 디렉토리주소는 스크립트 내에서 자주 사용하는 값이니 변수로 저장. /home/ec-user/은 첫 접속시 자동이동 되니 app/step1만 입력해도 될듯
 PROJECT_NAME=juju          // 프로젝트 디렉토리 이름 또한 동일하게 변수로 저장. 쉘에서는 타입 없이 선언하여 저장, $변수명으로 변수를 사용가능. 이프로젝트이름은 git프로젝트이름과 같다.
 
-cd $REPOSITORY/$PROJECT_NAME/   //제일처음 git clone 받았던 디렉토리로 이동. 쉘변수명에 따라 /home/ec-user/app/step1/juju
+cd $REPOSITORY/$PROJECT_NAME/   //제일처음 git clone 받았던 디렉토리로 이동. 쉘변수명에 따라 /home/ec2-user/app/step1/juju
 
 echo "> Git Pull"
 git pull                //디렉토리 이동 후, master 브랜치의 최신내용을 받는다.
@@ -83,7 +83,8 @@ JAR_NAME=$(ls -tr grep *.jar | tail -n 1)
 
 echo "> JAR Name: $JAR_NAME"
 cd
-nohup java -jar $REPOSITORY/$JAR_NAME 2>&1 &
+nohup java -jar $REPOSITORY/com.jujuldu.book-1.0-SNAPSHOT.jar 2>&1 &
+
 //찾은 jar파일명으로 해당 jar파일을 nohup로 실행
 //스프링부트의 장점으로 특별히 외장 톰캣을 설치할 필요 없음.
 //내장 톰캣을 사용해 jar파일만 있으면 바로 웹 애플리케이션 서버를 실행할 수 있음.
@@ -97,3 +98,43 @@ chmod +x ./deploy.sh        //이파일이 있는 디렉토리를 찾아가야�
 
 #이 스크립트를 다음 명령어로 실행.
 ./deploy.sh
+
+
+
+jar파일이 들어있는 target 디렉토리 안에 들어가서 java -jar *.jar 로 실행 해보면 에러가 뜸.
+
+
+에러발생.
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Method springSecurityFilterChain in org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration required a bean of type 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository' that could not be found.
+
+The following candidates were found but could not be injected:
+        - Bean method 'clientRegistrationRepository' in 'OAuth2ClientRegistrationRepositoryConfiguration' not loaded because OAuth2 Clients Configured Condition registered clients is not available
+
+
+Action:
+
+Consider revisiting the entries above or defining a bean of type 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository' in your configuration.
+
+
+
+3. 외부 security 파일 등록하기
+위 에러 발생이유는 ClientRegistrationRepository 을 생성하려면 clientId와 clientSecret이 필수인데  application-oauth.properties가 없어 실행이 안됨.
+
+app 디렉토리에 propertise 파일 생성.
+cd /home/ec2-user/app/application-oauth.properties
+
+# 방금 생성한 application-oauth.properties 쓰도록 deploy.sh파일의 수정 (nohup java -jar $REPOSITORY/$JAR_NAME 2>&1 & 이부분 수정)
+ nohup java -jar \
+    -Dspring.config.location=classpath:/application.properties, /home/ec2-user/app/application-oauth.properties \  nohup java -jar app/step1/com.jujuldu.book-1.0-SNAPSHOT.jar 2>&1 &
+//Dspring.config.location :
+//스프링 설정 파일 위치를 지정.
+//기본옵션들을 담고 있는 application.properties와 application-oauth.properties의 위치를 지정.
+//classpath가 붙으면 jar 안에 있는 resources 디렉토리를 기준으로 경로가 생성. application-oauth.properties는 절대경로 생성. 외부에 파일이 있기 때문.
+
+사실상 성공하지 못해 그냥 깃에 application-oauth.properties를 올렸다.

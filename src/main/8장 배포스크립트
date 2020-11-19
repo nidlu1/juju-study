@@ -1,5 +1,48 @@
 #일단 application-oauth.properties를 지운다. 왜냐하면 중요정보니까 git에 직접 있어선 안됨.
+#배포스크립트 만드는데 실패해서 그냥 직접 만들었다.
 
-REPOSITORY=app/step1
+vim ~/app/step1/deploy.sh
+
+#!/bin.bash
+REPOSITORY=/home/ec2-user/app/step1
 PROJECT_NAME=juju
+
 cd $REPOSITORY/$PROJECT_NAME/
+echo "> Git Pull"
+git pull
+echo "> 프로젝트 Build 시작"
+./gradlew Build
+
+echo "> step1 디렉토리로 이동"
+cd $REPOSITORY
+
+echo "> Build 파일 복사"
+cp $REPOSITORY/$PROJECT_NAME/build/libs/*.jar $REPOSITORY/
+
+echo "> 현재 구동중인 애플리케이션 pid 확인"
+CURRENT_PID=$(pgrep -f com.jujuldu.book-1.0-SNAPSHOT.jar)
+
+echo "> 현재 구동 중인 애플리케이션 pid: $CURRENT_PID"
+if [ -z "$CURRENT_PID"];
+then
+    echo ">현재 구동중인 애플리케이션이 없으므로 종료하지 않습니다."
+else
+    echo "> kill -15 $CURRENT_PID"
+    kill -15 $CURRENT_PID
+    sleep 5
+fi
+echo "> 새 애플리케이션 배포"
+JAR_NAME=$(ls -tr $REPOSITORY | grep *.jar | tail -n 1)
+echo "> JAR Name: $JAR_NAME"
+
+nohup java -jar $REPOSITORY/$JAR_NAME 2>&1 &
+nohup java -jar \
+    -Dspring.config.location=classpath:/application.propertise, /home/ec2-user/app/application-oauth.properties \ $REPOSITORY/$JAR_NAME 2>&1 &
+
+
+
+cd
+cd app/step1/
+chmod +x ./deploy.sh        //이파일이 있는 디렉토리를 찾아가야함.
+
+./deploy.sh
