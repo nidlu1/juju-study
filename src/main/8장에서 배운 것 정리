@@ -1,0 +1,99 @@
+---ec2 서버에 프로젝트를 배포해보자.
+
+1. ec2에 프로젝트 clone 받기.
+#ec2에 깃 설치.
+sudo yum install git
+#버전확인
+git --version
+#git clone으로 프로젝트를 저장할 디렉토리를 생성.
+mkdir ~/app && mkdir ~/app/step1
+#생성된 디렉토리 이동
+cd ~/app/step1
+#본인git의 http주소를 복사.
+git clone https://github.com/nidlu1/juju.git
+#클론된 프로젝트로 이동, 파일들이 복사되었는지 확인
+cd juju
+ll
+#코드들이 잘 수행되는지 테스트로 검증
+./gradlew test
+        ->성공시 BUILD SUCCESSFUL ....
+        ->테스트 실패해서 수정 후 깃허브에 푸시했다면 프로젝트 폴더안에서 명령어
+            git pull
+        -> -bash: ./gradlew: permission denied 처럼 gradlew실행권한이 없을시
+            chmod +x ./gradlew 로 실행권한을 추가한뒤 테스트 수행
+**현재 ec2엔 그레이들이 설치 되있지 않으나 gradle task(test)를 수행할 수 있는 이유는 프로젝트 내부의 gradlew 파일이 그레이들을 쓸 수 있도록 지원하는 wrapper역할을 한다.
+
+2. 프로젝트의 테스트, 빌드, 실행 중 배포 스크립트 만들기
+배포의 의미: git clone 혹 git pull을 통해 새버전의 프로젝트를 받고 gradle,maven을 통해 프로젝트 테스트와 빌드, ec2서버에서 해당 프로젝트 실행 및 재실행.
+이를 개발자가 일일히 명령어를 쳐서 하는건 불편하니 쉘스크립트로 작성해 스크립트만 실행시 다음을 모두 실행하는 것.
+
+쉘스크립트와 vim은 다른 역할.
+쉘스크립트: sh확장자
+vim: gui(윈도우처럼 마우스를 사용할 수 없는 환경.) 편집도구
+
+#빔외에도 이맥스 나노등의 도구가 지원하지만 빔으로 리눅스 환경에서 편집진행
+#파일 생성
+vim ~/app/step1/deploy.sh
+
+#vim의 기본적인 설명.
+https://github.com/johngrib/simple_vim_guide/blob/master/md/for_beginners.md
+
+배포스크립트 작성.
+#!/bin.bash
+REPOSITORY=/home/ec-user/app/step1  //프로젝트 디렉토리주소는 스크립트 내에서 자주 사용하는 값이니 변수로 저장. /home/ec-user/은 첫 접속시 자동이동 되니 app/step1만 입력해도 될듯
+PROJECT_NAME=juju          // 프로젝트 디렉토리 이름 또한 동일하게 변수로 저장. 쉘에서는 타입 없이 선언하여 저장, $변수명으로 변수를 사용가능. 이프로젝트이름은 git프로젝트이름과 같다.
+
+cd $REPOSITORY/$PROJECT_NAME/   //제일처음 git clone 받았던 디렉토리로 이동. 쉘변수명에 따라 /home/ec-user/app/step1/juju
+
+echo "> Git Pull"
+git pull                //디렉토리 이동 후, master 브랜치의 최신내용을 받는다.
+
+echo "> 프로젝트 Build 시작"
+./gradlew Build         // 프로젝트 내부의 gradlew로 build를 수행.
+
+echo "> step1 디렉토리로 이동"
+cd
+cd $REPOSITORY
+
+echo "> Build 파일 복사"
+cd
+cp $REPOSITORY/$PROJECT_NAME/build/libs/*.jar $REPOSITORY/          //build의 결과물인 jar파일을 복사해 jar파일을 모아둔 위치로 복사함.
+
+echo "> 현재 구동중인 애플리케이션 pid 확인"
+cd
+cd $REPOSITORY
+CURRENT_PID=$(pgrep -f ${PROJECT_NAME}*.jar)        //기존에 수행중이던 스프링부트 애플리케이션을 종료. pgrep: process id만 추출하는 명령어 -f옵션은 프로세스 이름으로 찾음.
+CURRENT_PID=$(pgrep -f com.jujuldu.book-1.0-SNAPSHOT.jar)
+
+echo "> 현재 구동 중인 애플리케이션 pid: $CURRENT_PID"
+if [ -z "$CURRENT_PID"];
+then            //현재 구동 중인 프로세스가 있는지 없는지를 판단해서 기능을 수행. process id값을 보고 프로세스가 있으면 해당 프로세스를 종료.
+    echo ">현재 구동중인 애플리케이션이 없으므로 종료하지 않습니다."
+else
+    echo "> kill -15 $CURRENT_PID"
+    kill -15 $CURRENT_PID
+    sleep 5
+fi
+
+echo "> 새 애플리케이션 배포"
+//JAR_NAME=$(ls -tr $REPOSITORY/ | grep *.jar | tail -n 1)        // 새로 실행할 jar 파일명을 찾는다. 여러 jar파일이 생기기 때문에 tail -n으로 가장 나중의 jar파일(최신파일)을 변수에 저장.
+cd
+cd $REPOSITORY
+JAR_NAME=$(ls -tr grep *.jar | tail -n 1)
+
+echo "> JAR Name: $JAR_NAME"
+cd
+nohup java -jar $REPOSITORY/$JAR_NAME 2>&1 &
+//찾은 jar파일명으로 해당 jar파일을 nohup로 실행
+//스프링부트의 장점으로 특별히 외장 톰캣을 설치할 필요 없음.
+//내장 톰캣을 사용해 jar파일만 있으면 바로 웹 애플리케이션 서버를 실행할 수 있음.
+//일반적으로 자바를 실행할 때는 java -jar라는 명령어를 사용하지만 이렇게 하면 사용자가 이렇게하면 사용자가 터미널접속을 끊을 때 애플리케이션도 같이 종료됩니다.
+//애플리케이션 실행자가 터미널을 종료해도 애플리케이션은 계속 구동될 수 있도록 nohup 명령어를 사용.
+
+#실행권한을 추가
+cd
+cd app/step1/
+chmod +x ./deploy.sh        //이파일이 있는 디렉토리를 찾아가야함.
+
+#이 스크립트를 다음 명령어로 실행.
+./deploy.sh

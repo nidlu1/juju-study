@@ -1,0 +1,5 @@
+#일단 application-oauth.properties를 지운다. 왜냐하면 중요정보니까 git에 직접 있어선 안됨.
+
+REPOSITORY=app/step1
+PROJECT_NAME=juju
+cd $REPOSITORY/$PROJECT_NAME/
