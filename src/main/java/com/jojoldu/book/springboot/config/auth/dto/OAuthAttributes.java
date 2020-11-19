@@ -29,10 +29,8 @@ public class OAuthAttributes {
         System.out.println("==========OAuthAttributes.of==========");
         //구글인지 네이버인지 판단한다.
         if ("naver".equals(registrationId)) {
-            System.out.println("======================of네이버함수:"+registrationId);
             return ofNaver("id", attributes);
         }else
-            System.out.println("======================of구글함수:"+registrationId);
             
         return ofGoogle(userNameAttributeName, attributes);
     }
