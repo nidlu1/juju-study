@@ -40,3 +40,23 @@ Travis CI 배포 자동화
                   - nidlu1@naver.com
 
         master브랜치에 커밋과 푸시함. 1번 테스트 실패.
+
+3. travis ci와 aws s3 연동하기
+    s3: aws에서 제공하는 일종의 파일 서버. 이미지를 비롯한 정적파일 관리하거나, 지금 진행하는 것처럼 배포파일들을 관리하는 기능 지원.
+        이미지 업로드를 구현시 s3를 이용해 구현.
+    travis ci 연동시 구조: https://jojoldu.tistory.com/265
+        s3을 연동이 먼저 필요한 이유는 jar를 전달하기 위해.
+        codedeploy는 저장기능이 없음. 그래서 travis ci 가 빌드한 결과물을 받아서 codedeploy가 가져갈 수 있도록 공간이 필요해 aws s3을 이용함.
+
+    AWS key 발급
+        일반적으로 AWS서비스에 외부서비스 접근 불가능. 접근가능한 key를 생성해야함. IAM가 서비스함.
+            사용자추가: 엑세스유형은 프로그래밍방식.
+            권한정책은 기존정책 직접연결-> amazons3fullaccess 체크, AWSCodeDeployFullAccess 체크
+            태그는 nidlu
+        사용자: nidlu-travis-deploy
+        액세스키: AKIAZ5XBFTYAWINLND6Z
+        비밀엑세스키: EQJeq/AFuo5bqHjKxjzxB8tnHfxQ25K8sVhe7cjf
+
+    travis CI에 키등록
+        more option - setting - Environment Variables
+        $변수명으로 yml에서 사용가능.
