@@ -1,0 +1,36 @@
+use nidluaws;
+show variables like 'c%';
+
+alter database nidluaws
+CHARACTER set = 'utf8mb4'
+COLLATE = 'utf8_general_ci';
+
+
+show variables like '%char%';
+set character_set_client = utf8mb4;
+set character_set_connection = utf8mb4;
+set character_set_database = utf8mb4;
+set character_set_filesystem = utf8mb4;
+set character_set_server = utf8mb4;
+set character_set_system = utf8;
+
+show variables like 'Coll%';
+set collation_connection = utf8_general_ci;
+set collation_database = utf8_general_ci;
+set collation_server = utf8_general_ci;
+
+select @@time_zone, now() ;
+set time_zone = 'Asia/Seoul'; --이건 시간이 안맞아.
+set time_zone = 'UTC'; --이게 올바르다.??
+
+--한글명 들어가는지 테스트
+create table test (
+    id bigint(20) not null AUTO_INCREMENT,
+    content varchar(255) DEFAULT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB;
+
+insert into test(content) values ('테스트');
+select * from test;
+
+create table posts (id bigint not null auto_increment, create_date datetime, modified_date datetime, author varchar(255), content TEXT not null, title varchar(500) not null, primary key (id)) engine=MyISAM

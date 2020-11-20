@@ -1,5 +1,5 @@
 1. RDS 인스턴스 생성하기.
-DB-인스턴스 식별자: nidlu-was
+DB-인스턴스 식별자: nidlu-aws
 마스터: nidlu
 마스터암호: 상황병1!
 db명: nidluaws

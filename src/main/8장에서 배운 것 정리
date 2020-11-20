@@ -138,6 +138,7 @@ mariadb에서 스프링부트 프로젝트를 실행하기 위해선 몇가지 �
  *EC2(리눅스 서버) 설정 : 데이터베이스접속정보는 중요하게 보호해야할 정보. 공개되면 외부에서 데이터 스틸 가능. 깃허브 같은 오픈된 공간에선 누구나 해킹할 위험 있음. ec2내부에서 접속정보 관리.
 
 #RDS테이블 생성.
+use nidluaws; 로 사용할 테이블을 지정.
 테스트코드 수행시 로그로 생성되는 쿼리 이용.
 Hibernate: create table posts (id bigint not null auto_increment, create_date datetime, modified_date datetime, author varchar(255), content TEXT not null, title varchar(500) not null, primary key (id)) engine=MyISAM
 Hibernate: create table user (id bigint not null auto_increment, create_date datetime, modified_date datetime, email varchar(255) not null, name varchar(255) not null, picture varchar(255), role varchar(255) not null, primary key (id)) engine=MyISAM
@@ -166,7 +167,52 @@ CREATE TABLE SPRING_SESSION_ATTRIBUTES (
 	CONSTRAINT SPRING_SESSION_ATTRIBUTES_FK FOREIGN KEY (SESSION_PRIMARY_ID) REFERENCES SPRING_SESSION(PRIMARY_ID) ON DELETE CASCADE
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC;
 
-복사해서 RDS에 반영함.????????????
+복사해서 RDS에 반영함. 플러그인에 설치한 db네비게이터 db브라우저에 반영 285p
 
 #프로젝트 설정: 그레이들에 마리아db드라이버 등록.
 #어플리케이션-리얼.프로퍼티즈 생성. 실제 운영될 환경이 구성되는 설정값.
+#ec2 설정.
+oauth처럼 rds 접속정보도 보호해야할 정보니 ec2 서버에 직접 설정파일을 둔다.
+    vim ~/app/application-real-db.properties
+생성해서 아래 를 입력
+    spring.jpa.hibernate.ddl-auto=none
+    spring.datasource.url=jdbc:mariadb://rds주소:포트명(기본은 3306)/database명 //jpa로 테이블이 자동생성되는 옵션을 none으로 지정함. rds는 실제로 운영될 테이블이니 스프링부트에서 새로 만들지 않도록 조심. 안그러면 테이블이 계속 만들어져 에러및 돈이 깨짐.
+    spring.datasource.username=db계정
+    spring.datasource.password=db계정 비밀번호
+    spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+
+deploy.sh 파일 수정.
+    nohup java -jar -Dspring.config.location=classpath:/application.properties,/home/ec2-user/app/application-oauth.properties $REPOSITORY/$JAR_NAME 2>&1 &
+    nohup java -jar -Dspring.config.location=classpath:/application.properties,/home/ec2-user/app/application-oauth.properties,/home/ec2-user/app/application-real-db.properties -Dspring.profiles.active=real $REPOSITORY/$JAR_NAME 2>&1 &
+    -Dspring.profiles.active=real : application-real.properties를 활성화. application-real.properties의 spring.profiles.include-oauth, real-db 옵션 덕분에 real-db역시 함께 활성화.
+
+보안유지때문에 ec2파일에 넣는다지만 나는 잘 되지 않아서 그냥 깃에다 넣었다.
+리눅스서버에 이후 curl localhost:8080 입력.
+    index html 소스코드가 보이면 성공.
+
+8.5 EC2에서 소셜 로그인하기.
+# AWS 보안그룹 변경. 인바운드에 8080이 열려있으면 됨다.
+    보안그룹은 인스턴스-작업-네트워킹 에서 확인.
+# aws ec2 도메인으로 접속. ec2-15-165-102-78.ap-northeast-2.compute.amazonaws.com:8080
+
+#구글
+    승인된 리디렉션 url : http://ec2-15-165-102-78.ap-northeast-2.compute.amazonaws.com:8080/login/oauth2/code/google
+#네이버
+    서비스 url : http://ec2-15-165-102-78.ap-northeast-2.compute.amazonaws.com/ (포트입력x)
+    Callback UR : http://ec2-15-165-102-78.ap-northeast-2.compute.amazonaws.com:8080/oauth2/authorization/naver
+
+지금까지 빌드와 배포를 진행하면서 불편한 점은?
+    수동실행되는 Test.
+        본인의 코드가 다른 개발자코드에 영향을 끼지지 않는지 확인하기 위해 전체테스트 수행.
+        현재 상태에선 항상 개발자가 작업 진행할 때마다 수동으로 전체 테스트 수행.
+    수동 build
+        다른 사람이 작성한 브랜치와 본인이 작성한 브랜치가 합쳐졌을 때 merge 이상이 없는지는 build를 수행해야만 알 수 있다.
+        이를 매번 개발자가 직접 실행해야함.
+9장은 수동test&build를 자동화시키는 작업.
+깃허브에 푸시하면 자동으로 test, build, deploy되도록 개선하는 작업.
+
+이장에서 배운점
+    AWS EC2 서비스에 스프링 부트 프로젝트를 배포하는 장법.
+    간단한 쉘 스크립트 사용방법
+    스프링부트 프로젝트와 AWS RDS 연동방법
+    EC2에서 구글 네이버 로그인 설정방법
