@@ -39,4 +39,4 @@ Travis CI 배포 자동화
                 recipients:
                   - nidlu1@naver.com
 
-        master브랜치에 커밋과 푸시함.
+        master브랜치에 커밋과 푸시함. 1번 테스트 실패.
