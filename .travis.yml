@@ -33,4 +33,4 @@ deploy:
 notifications:
   email:
     recipients:
-      - nidlu@naver.com
+      - nidlu1@naver.com
