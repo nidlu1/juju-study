@@ -88,3 +88,41 @@ Travis CI 배포 자동화
                 wait-until-deployed: true
 
             //되지 않았다.
+
+4. travis CI와 aws s3, codeDeploy 연동하기
+    aws의 배포시스템인 codedeploy를 이용하기 전에 배포대상인 ec2가 codedeploy를 연동받을 수 있게 iam역할을 하나 생성.
+
+    ec2에 iam 역할 추가하기
+    ima 역할과 사용자 차이
+        역할: aws서비스에만 할당할 수 있는 권한: ec2, codedeploy,sqs 등
+        사용자: aws서비스 외에 사용할 수 있는 권한: 로컬pc, idc 서버등.
+
+    지금 만들권한은 ec2에서 사용할 것. aws서비스->ec2
+        정책은 AmazonEC2RoleforAWSCodeDeploy
+
+    만든 역할을 ec2서비스에 등록.
+        인스턴스->인스턴스 설정->iam역할바꾸기->재부팅.
+
+    재부팅완료시 codedeploy의 요청을 받을 수 있게 에이전트 설치
+        ec2에 접속해서 다음명령어 입력.
+            aws s3 cp s3://aws-codedeploy-ap-northeast-2/latest/install . --region ap-northeast-
+            성공시
+                download: s3://aws-codedeploy-ap-northeast-2/latest/install to ./intall
+            install파일에 실행권한 추가
+            //포기:
+
+    codedeploy를 위한 권한 생성.
+        배포삼형제
+            code commit: 깃허브처럼 코드저장소. 프라이빗 기능을 지원함. 깃허브도 지원함.
+            code build: travis ci 빌드용서비스: 멀티 모듈을 배포하는 경우 사용할만하지만, 규모가 있는 서비스에선 대부분 젠킨스,/팀시티 등을 이용.
+            code deploy: aws의 배포서비스. 대체제가 없음.
+
+        code commit은 깃허브. code build는 travis ci가 하고 있음.
+
+
+    9장 내용정리
+        1. ci cd에 대한 소개
+        2. github의 무료 ci서비스인 travis ci에 대한 소개와 프로젝트 연동방법
+        3. AWS cd서비스인 code deploy에 대한 소개와 프로젝트 연동방법
+        4. 수동배포방식에서 자동화방식으로 개선
+        5. codeDeploy에서 오류로그를 보는 방법.

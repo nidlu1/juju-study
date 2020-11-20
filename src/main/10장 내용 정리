@@ -1,0 +1,36 @@
+24시간 365일 중단 없는 서비스를 만들자.
+    9장에서 travis ci를 활용해 배포자동화 환경을 구축.
+        문제점: 새로운 jar가 실행되기 전까진 jar를 종료시킴.
+    무중단배포의 방식
+        AWS에서 블루그린 무중단배포
+        도커를 이용한 웹서비스 무중단배포
+        L4 스위치를 이용한 무중단배포
+        Nginx를 이용한 무중단배포
+
+
+2. 엔진엑스 설치와 스프링부트 연동하기
+    엔진엑스 설치
+            sudo yum install nginx
+        엔진엑스 실행
+            sudo service nginx start
+            Starting nginx: [OK]
+    보안그룹추가
+        엔진엑스의 포트번호는 기본적으로 80
+        ec2 인스턴스에 들어가 보안그룹 편집
+    리다이렉션 주소추가
+        80포트로 주소가 변경되니 구글과 네이버로그인도 변경된 주소 등록
+        http://ec2-15-165-102-78.ap-northeast-2.compute.amazonaws.com/
+    엔진엑스와 스프링부트연동
+        sudo vim /etc/nginx/nginx.conf
+        추가 코드
+        include /etc/nginx/default.d/*.conf
+        location /{
+            proxy_pass http://localhost:8080; 엔진엑스로 요청이 오면 http://localhost:8080로 전달
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; // proxy_set_header: 실제요청데이터를 header의 각 항목에 할당합니다
+            proxy_set_header Host $http_host;
+        }
+
+        sudo service nginx restart
+
+3.무중단배포 스크립트 만들기
