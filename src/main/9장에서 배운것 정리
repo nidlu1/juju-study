@@ -60,3 +60,29 @@ Travis CI 배포 자동화
     travis CI에 키등록
         more option - setting - Environment Variables
         $변수명으로 yml에서 사용가능.
+
+    s3버킷 생성
+        다음으로 s3에 관해 설정을 진행. aws의 s3 서비스는 일종의 파일서버: 순수하게 파일들을 저장하고 접근권한을 관리, 검색등을 지원하는 파일서버의 역할.
+            s3은 게시글을 쓸 때 나오는 첨부파일 등록을 구현할 때 많이 이용.
+            travis ci에서 생성된 build파일을 저장하도록 구성.
+            s3애서 저장된 build파일은 이후 aws의 codedeploy에서 배포할 파일로 가져가도록 구성.
+        aws서비스에서 s3을 검색하고 버킷 생성.
+            버킷 이름은 배포할 zip파일이 모여있는 장소임을 의미하도록.
+            퍼블릭엑세스 설정: 실제 서비스시 jar파일이 퍼블릭이면 누구나 내려받을 수 있어 코드,설정값, 주요키 값이 다 탈취된다.
+                퍼플릭이 아니더라도 iam 사용자로 발급받은 키를 사용하니 접근가능. 모든 엑세스를 차단하는 설정에 체크.
+        .travis.yml에 추가
+
+            before_deploy:      // deploy 명령어가 실행되기 전에 수행됨. codleDeploy는 Jar파일은 인식못해 jar+기타 설정파일들을 모아 압축함.
+              -zip -r juju *        //현재 위치에 모든 파일을 juju이름으로 압축함. 명령어의 마지막 위치는 본인 프로젝트의 이름.
+              -mkdir -p deploy      //deploy라는 디렉토리를 travis ci가 실행 중인 위치에서 생성.
+              -mv juju.zip deploy/juju.zip      //juju.zip 파일을 deploy/juju.zip으로 이동.
+            deploy:         // s3로 파일업로드 혹은 codeDeploy로 배포 등 외부서비스와 연동될 행위들을 선언.
+              - provider: s3
+                access_key_id: $AWS_ACCESS_KEY # Travis repo settings에 설정된 값
+                secret_access_key: $AWS_SECRET_KEY # Travis repo settings에 설정된 값
+                bucket: nidlu-juju-build # S3 버킷
+                region: ap-northeast-2
+                skip_cleanup: true
+                acl: private # zip 파일 접근을 private으로
+                local_dir: deploy # before_deploy에서 생성한 디렉토리    //앞에서 생성한 deploy디렉토리를 지정. 해당위치의 파일만 S3으로 전송.
+                wait-until-deployed: true
