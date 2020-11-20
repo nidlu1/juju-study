@@ -29,8 +29,8 @@ deploy:
     local_dir: deploy # before_deploy에서 생성한 디렉토리
     wait-until-deployed: true
 
-#CI 실행 완료시 메일로 알람
+#CI 실행 완료시 메일로 알람 1
 notifications:
   email:
     recipients:
-      - nidlu1@naver.com
+      - nidlu@naver.com
