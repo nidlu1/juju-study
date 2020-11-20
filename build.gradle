@@ -34,6 +34,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-mustache') //머스테치 템플릿
     compile('org.springframework.boot:spring-boot-starter-oauth2-client') //스프링시큐리티, oauth설정할 때 필요한 의존성
     compile('org.springframework.session:spring-session-jdbc') // 데이터베이스 사용할 때 필요한 의존성. application.properties 에도 설정.
+    compile('org.mariadb.jdbc:mariadb-java-client') //마리아db 드라이버
     testCompile('org.springframework.boot:spring-boot-starter-test') //테스트 코드 작성 의존
 
     //testCompile('org.springframework.security:spring-test') //스프링시큐리티 테스트코드 작성(임의사용자 생성)

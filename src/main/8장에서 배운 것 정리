@@ -133,6 +133,40 @@ nohup java -jar -Dspring.config.location=classpath:/application.properties,/home
 
 8.4 스프링부트프로젝트로 RDS접근하기.
 mariadb에서 스프링부트 프로젝트를 실행하기 위해선 몇가지 작업이 필요.
- *테이블생성
- *프로젝트 설정
- *EC2(리눅스 서버) 설정
+ *테이블생성 : H2에서 자동생성하는 테이블을 mariadb에선 직접 쿼리를 이용해 생성.
+ *프로젝트 설정 : 자바 프로젝트가 mariadb에 접근하려면 데이터베이스 드라이버 필요.
+ *EC2(리눅스 서버) 설정 : 데이터베이스접속정보는 중요하게 보호해야할 정보. 공개되면 외부에서 데이터 스틸 가능. 깃허브 같은 오픈된 공간에선 누구나 해킹할 위험 있음. ec2내부에서 접속정보 관리.
+
+#RDS테이블 생성.
+테스트코드 수행시 로그로 생성되는 쿼리 이용.
+Hibernate: create table posts (id bigint not null auto_increment, create_date datetime, modified_date datetime, author varchar(255), content TEXT not null, title varchar(500) not null, primary key (id)) engine=MyISAM
+Hibernate: create table user (id bigint not null auto_increment, create_date datetime, modified_date datetime, email varchar(255) not null, name varchar(255) not null, picture varchar(255), role varchar(255) not null, primary key (id)) engine=MyISAM
+
+ctrl+shift+n 으로 schema-mysql.sql 파일에서 확인
+CREATE TABLE SPRING_SESSION (
+	PRIMARY_ID CHAR(36) NOT NULL,
+	SESSION_ID CHAR(36) NOT NULL,
+	CREATION_TIME BIGINT NOT NULL,
+	LAST_ACCESS_TIME BIGINT NOT NULL,
+	MAX_INACTIVE_INTERVAL INT NOT NULL,
+	EXPIRY_TIME BIGINT NOT NULL,
+	PRINCIPAL_NAME VARCHAR(100),
+	CONSTRAINT SPRING_SESSION_PK PRIMARY KEY (PRIMARY_ID)
+) ENGINE=InnoDB ROW_FORMAT=DYNAMIC;
+
+CREATE UNIQUE INDEX SPRING_SESSION_IX1 ON SPRING_SESSION (SESSION_ID);
+CREATE INDEX SPRING_SESSION_IX2 ON SPRING_SESSION (EXPIRY_TIME);
+CREATE INDEX SPRING_SESSION_IX3 ON SPRING_SESSION (PRINCIPAL_NAME);
+
+CREATE TABLE SPRING_SESSION_ATTRIBUTES (
+	SESSION_PRIMARY_ID CHAR(36) NOT NULL,
+	ATTRIBUTE_NAME VARCHAR(200) NOT NULL,
+	ATTRIBUTE_BYTES BLOB NOT NULL,
+	CONSTRAINT SPRING_SESSION_ATTRIBUTES_PK PRIMARY KEY (SESSION_PRIMARY_ID, ATTRIBUTE_NAME),
+	CONSTRAINT SPRING_SESSION_ATTRIBUTES_FK FOREIGN KEY (SESSION_PRIMARY_ID) REFERENCES SPRING_SESSION(PRIMARY_ID) ON DELETE CASCADE
+) ENGINE=InnoDB ROW_FORMAT=DYNAMIC;
+
+복사해서 RDS에 반영함.????????????
+
+#프로젝트 설정: 그레이들에 마리아db드라이버 등록.
+#어플리케이션-리얼.프로퍼티즈 생성. 실제 운영될 환경이 구성되는 설정값.
