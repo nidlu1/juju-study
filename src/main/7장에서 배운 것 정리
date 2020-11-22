@@ -32,7 +32,7 @@ collation_server= utf8mb4_general_ci
 인바운드 편집: 사용자지정으로 보안그룹 그룹id를 입력.
 
 #Database 플러그인 설치.
-엔드포인트 확인하기: nidlu-aws.cdbcwkbc92jq.ap-northeast-2.rds.amazonaws.com
+엔드포인트 확인하기: nidlu-aws.cdbcwkbc92jq.ap-northeast-2.rds.amazonaws.com/nidluaws
 -> database navigator 설치
 
 ctrl+shift+a 로 액션 실행 후 database browser 실행.

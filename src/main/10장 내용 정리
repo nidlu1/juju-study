@@ -25,12 +25,52 @@
         추가 코드
         include /etc/nginx/default.d/*.conf
         location /{
-            proxy_pass http://localhost:8080; 엔진엑스로 요청이 오면 http://localhost:8080로 전달
+            proxy_pass http://localhost:8080;       //엔진엑스로 요청이 오면 http://localhost:8080로 전달
             proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; // proxy_set_header: 실제요청데이터를 header의 각 항목에 할당합니다
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;    // proxy_set_header: 실제요청데이터를 header의 각 항목에 할당합니다
             proxy_set_header Host $http_host;
         }
 
         sudo service nginx restart
 
 3.무중단배포 스크립트 만들기
+    배포 전에 API 추가. ProfileControllerTest, ProfileControllerUnitTest
+
+    application-real1.properties, application-real2.properties 생성.
+
+    엔진엑스 설정 수정.
+        무중단배포의 핵심은 엔진엑스 설정. 배포 때마다 엔진엑스의 프록시 설정(스프링부트로 요청을 흘려보내는)이 순식간에 교체됨. 여기서 프록시 설정이 교체될 수 있도록 추가함.
+        엔진엑스 설정이 모여있는 /etc/nginx/conf.d/ 에 service-url.inc 생성
+            sudo vim /etc/nginx/conf.d/service-url.inc
+        코드 입력.
+            set $service_url http://127.0.0.1:8080;
+        저장하고 종료후, 해당파일은 엔진엑스가 사용할 수 있게 설정.
+            sudo vim /etc/nginx/nginx.conf
+            location / 부분을 찾아 변경.
+                include /etc/nginx/conf.d/service-url.inc;
+                location / {
+                    proxy_pass $service_url;
+                }
+            재시작
+                sudo service nginx restart
+
+    배포스크립트들 작성.
+        먼저 step2와 중복되지 않게 ec2에 step3 디렉토리를 생성
+            mkdir ~/app/step3 && mkdir ~/app/step3/zip
+
+        appspec.yml 역시 step3로 배포되도록 수정
+            version: 0.0
+            os: linux
+            files:
+                -source: /
+                destination: /home/ec2-user/app/step3/zip/
+                overwrite: yes
+
+        무중단 배포를 진행할 스크립트는 5개
+            stop.sh: 기존 엔진엑스에 연결되어 있진 않지만, 실행 중이던 스프링부트 종료
+            start.sh: 배포할 신규버전 스프링부트 프로젝트를 stop.sh로 종료한 'profile'로 실행
+            health.sh: 'start.sh'로 실행시킨 프로젝트가 정상적으로 실행됐는지 체크
+            switch.sh: 엔진엑스가 바라보는 스프링부트를 최신버전으로 변경.
+            profile.sh: 앞선 4개 스크립트 파일에서 공용으로 사용할 profile과 포트체크 로직.
+
+        appspec.yml

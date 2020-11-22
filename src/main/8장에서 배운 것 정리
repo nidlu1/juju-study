@@ -140,8 +140,8 @@ mariadb에서 스프링부트 프로젝트를 실행하기 위해선 몇가지 �
 #RDS테이블 생성.
 use nidluaws; 로 사용할 테이블을 지정.
 테스트코드 수행시 로그로 생성되는 쿼리 이용.
-Hibernate: create table posts (id bigint not null auto_increment, create_date datetime, modified_date datetime, author varchar(255), content TEXT not null, title varchar(500) not null, primary key (id)) engine=MyISAM
-Hibernate: create table user (id bigint not null auto_increment, create_date datetime, modified_date datetime, email varchar(255) not null, name varchar(255) not null, picture varchar(255), role varchar(255) not null, primary key (id)) engine=MyISAM
+Hibernate:
+Hibernate: create table user (id bigint not null auto_increment, create_datcreate table posts (id bigint not null auto_increment, create_date datetime, modified_date datetime, author varchar(255), content TEXT not null, title varchar(500) not null, primary key (id)) engine=MyISAMe datetime, modified_date datetime, email varchar(255) not null, name varchar(255) not null, picture varchar(255), role varchar(255) not null, primary key (id)) engine=MyISAM
 
 ctrl+shift+n 으로 schema-mysql.sql 파일에서 확인
 CREATE TABLE SPRING_SESSION (

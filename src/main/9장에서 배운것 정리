@@ -119,6 +119,35 @@ Travis CI 배포 자동화
 
         code commit은 깃허브. code build는 travis ci가 하고 있음.
 
+    travis CI, S3, CodeDeploy 연동
+        먼저 S3에서 넘겨줄 zip파일을 저장할 디렉토리 생성. ec2서버에 접속해서 다음과 같이 디렉토리 설정
+            mkdir ~/app/step2 && mkdir ~/app/step2/zip
+
+        travis ci의 build가 끝나면 s3에 zip파일이 전송되고, 이 zip파일은 /home/ec2-user/app/step2/zip로 복사되어 압축 풀기
+            travis ci 설정은 .travis.yml로 진행.
+            AWS codedeploy 설정은 appsepc.yml로 진행
+                version: 0.0        //codedeploy 버전. 프로젝트버전이 아니니 0.0 외 다른 버전을 사용하면 오류발생.
+                os: linux
+                files:
+                    - source:   /       //codeDeploy에서 전달해준 파일 중 destination으로 이동시킬 대상을 지정. 루트경로(/)를 지정하면 전체파일.
+                      destination: /home/ec2-user/app/step2/zip/        //source에서 지정된 파일을 받을 위치. 이후 jar를 실행하는 등 기능은 desination에서 옮긴 파일들로 진행.
+                      overwrite: yes        //기존의 파일들이 있으면 덮어쓸지 결정.
+
+        .travis.yml에 codeDeploy 내용을 추가. deploy항목에 다음코드를 추가.
+            deploy:
+                ...
+              - provider: condedeploy
+                access_key_id: $AWS_ACCESS_KEY # Travis repo settings에 설정 된 값.
+                secret_access_key: $AWS_SECRET_KEY # # Travis repo settings에 설정 된 값.
+                bucket: juju #S3 버킷
+                key: juju.zip #빌드파일을 압축해서 전달
+                bundle_type: zip #압축확장자
+                application: juju #웹콘솔에서 등록한 codeDeploy 애플리케이션
+                deployment_group: juju-group # 웹콘솔에서 등록한 codedeploy 배포그룹
+                region: ap-northeast-2
+                wait-until-deployed: true
+
+
 
     9장 내용정리
         1. ci cd에 대한 소개

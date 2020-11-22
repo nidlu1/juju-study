@@ -29,6 +29,17 @@ deploy:
     local_dir: deploy # before_deploy에서 생성한 디렉토리
     wait-until-deployed: true
 
+  - provider: condedeploy
+    access_key_id: $AWS_ACCESS_KEY # Travis repo settings에 설정 된 값.
+    secret_access_key: $AWS_SECRET_KEY # # Travis repo settings에 설정 된 값.
+    bucket: juju #S3 버킷
+    key: juju.zip #빌드파일을 압축해서 전달
+    bundle_type: zip #압축확장자
+    application: juju #웹콘솔에서 등록한 codeDeploy 애플리케이션
+    deployment_group: juju-group # 웹콘솔에서 등록한 codedeploy 배포그룹
+    region: ap-northeast-2
+    wait-until-deployed: true
+
 #CI 실행 완료시 메일로 알람 1
 notifications:
   email:
