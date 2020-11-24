@@ -233,6 +233,16 @@ Travis CI 배포 자동화
                 - location: deploy.sh
                   timeout: 60
                   runas: ec2-user
+    실제배포과정 체험
+        build.gradle 에서 프로젝트 버전 변경.
+            version '1.0.1-SNAPSHOT'
+
+6. codeDeploy 로그 확인
+    codedeploy처럼 aws가 지원하는 서비스는 오류발생시 로그찾는 방법을 모르면 오류해결이 흠들다. 배포실패시 어느 로그를 보아하는가.
+    CodeDeploy에 관핸 대부분 내용은 /opt/codedeploy-agent/deployment-root 에 있음. 해당 디렉토리로 이동 한 뒤 목록을 확인 (ll)하면 다음내용을 확인할 수 있다.
+        drwxr-xr-x 7 root root 4096 7월 6 10:36 05737be4-8598-456e-8046-0a8a5db4dcb8 // 사용자마다 고유한 id 생성되어 각자 다른 id가 발급. 해당 디렉토리로 들어가면 배포한 단위별로 배포파일들이 존재함.
+        drwxr-xr-x 7 root root 4096 7월 6 09:26 deployment-logs // 로그파일, codedeploy로 이루어지는 배포내용중 표준입출력은 모두 여기에 담김.
+
 
     9장 내용정리
         1. ci cd에 대한 소개

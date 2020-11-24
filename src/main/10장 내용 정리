@@ -73,4 +73,40 @@
             switch.sh: 엔진엑스가 바라보는 스프링부트를 최신버전으로 변경.
             profile.sh: 앞선 4개 스크립트 파일에서 공용으로 사용할 profile과 포트체크 로직.
 
-        appspec.yml
+        appspec.yml에 앞선 스크립트를 사용하도록 설정.
+            version: 0.0
+            os: linux
+            files:
+              - source: /
+                destination: /home/ec2-user/app/step2/zip/
+                overwrite: yes
+            permission:
+              - object: /
+                pattern: "**"
+                owner: ec2-user
+                group: ec2-user
+            hooks:
+              AfterInstall:
+                - location: stop.sh #엔진엑스와 연결되지 않은 스프링부트를 종료
+                  timeout: 60
+                  runas: ec2-user
+              ApplicationStart:
+                - location: start.sh #엔진엑스와 연결되어 있지 않은 Port로 새버전의 스프링부트를 시작.
+                  timeout: 60
+                  runas: ec2-user
+              ValidateService:
+                - location: health.sh #새 스프링부트가 정상적으로 실행되었는지 확인.
+                  timeout: 60
+                  runas: ec2-user
+
+4. 무중단 배포테스트
+    잦은배포로 jar파일명이 겹칠 수 있으니 자동으로 버전값이 변경될 수 있도록 조치
+        build.gradle
+            version '1.0.1-SNAPSHOP-'+new DATE().format("yyyyMMddHHmmss")
+                // build.gradle은 Groovy 기반의 빌드툴. Groovy 언어의 여러 문법을 사용할 수 있음.
+    최종코드를 깃허브로 푸시하고 진행되면 codedeploy로그로 잘 진행되는지 확인
+        tail -f /opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log
+    스프링부트 로그를 보고 싶으면 다음명령어로 확인
+        vim ~/app/step3/nohup.out
+    한번 더 배포하면 real2로 배포. 이과정에서 브라우저 새로고침해도 중단이 없다. 2번 배포 후 자바애플리케이션 실행여부 확인
+        ps -ef | grep java
